@@ -1,0 +1,40 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+# Step 1: Define the URL of the website
+url = 'YOUR_TARGET_URL'
+
+# Step 2: Send a GET request to the website
+response = requests.get(url)
+
+# Step 3: Check if the request was successful
+if response.status_code == 200:
+    # Step 4: Parse the HTML content
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    # Step 5: Find product information (adjust selectors as needed)
+    products = soup.find_all('div', class_='product')  # Example class name
+    
+    # Step 6: Extract data
+    product_data = []
+    for product in products:
+        name = product.find('h2', class_='product-name').text.strip()  # Example selector
+        price = product.find('span', class_='product-price').text.strip()  # Example selector
+        description = product.find('p', class_='product-description').text.strip()  # Example selector
+        
+        product_data.append({
+            'Name': name,
+            'Price': price,
+            'Description': description
+        })
+    
+    # Step 7: Save data to CSV
+    with open('products.csv', mode='w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=['Name', 'Price', 'Description'])
+        writer.writeheader()
+        writer.writerows(product_data)
+
+    print("Data scraped and saved to products.csv")
+else:
+    print(f"Failed to retrieve data: {response.status_code}")
